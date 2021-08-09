@@ -152,6 +152,9 @@ type Reflector struct {
 
 	// Extra types allow for non-detectable types (oneOf of structs eg) to be referencable
 	ExtraTypes map[string]reflect.Type
+
+	// Skip the addition of the $schema property when create a reference
+	SkipSchemaOnRef bool
 }
 
 // Reflect reflects to Schema from a value.
@@ -330,10 +333,15 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 			if r.DoNotReference {
 				return st
 			} else {
-				return &Type{
-					Version: Version,
-					Ref:     "#/definitions/" + r.typeName(t),
+				res := &Type{
+					Ref: "#/definitions/" + r.typeName(t),
 				}
+
+				if !r.SkipSchemaOnRef {
+					res.Version = Version
+				}
+
+				return res
 			}
 
 		}
@@ -360,10 +368,15 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 	if r.DoNotReference {
 		return st
 	} else {
-		return &Type{
-			Version: Version,
-			Ref:     "#/definitions/" + r.typeName(t),
+		res := &Type{
+			Ref: "#/definitions/" + r.typeName(t),
 		}
+
+		if !r.SkipSchemaOnRef {
+			res.Version = Version
+		}
+
+		return res
 	}
 }
 
@@ -387,7 +400,7 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		}
 
 		property := r.reflectTypeToSchema(definitions, f.Type)
-		property.structKeywordsFromTags(f, st, name)
+		property.structKeywordsFromTags(f, st, name, r.SkipSchemaOnRef)
 
 		if nullable {
 			property = &Type{
@@ -419,10 +432,10 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 	}
 }
 
-func (t *Type) structKeywordsFromTags(f reflect.StructField, parentType *Type, propertyName string) {
+func (t *Type) structKeywordsFromTags(f reflect.StructField, parentType *Type, propertyName string, skipSchemaOnRef bool) {
 	t.Description = f.Tag.Get("jsonschema_description")
 	tags := strings.Split(f.Tag.Get("jsonschema"), ",")
-	t.genericKeywords(tags, parentType, propertyName)
+	t.genericKeywords(tags, parentType, propertyName, skipSchemaOnRef)
 	switch t.Type {
 	case "string":
 		t.stringKeywords(tags)
@@ -438,7 +451,7 @@ func (t *Type) structKeywordsFromTags(f reflect.StructField, parentType *Type, p
 }
 
 // read struct tags for generic keywords
-func (t *Type) genericKeywords(tags []string, parentType *Type, propertyName string) {
+func (t *Type) genericKeywords(tags []string, parentType *Type, propertyName string, skipSchemaOnRef bool) {
 	for _, tag := range tags {
 		nameValue := strings.Split(tag, "=")
 		if len(nameValue) == 2 {
@@ -473,11 +486,16 @@ func (t *Type) genericKeywords(tags []string, parentType *Type, propertyName str
 				types := strings.Split(nameValue[1], ";")
 				for _, ty := range types {
 					if strings.HasPrefix(ty, "$") {
+						res := &Type{
+							Ref: "#/definitions/" + strings.TrimPrefix(ty, "$"),
+						}
+
+						if !skipSchemaOnRef {
+							res.Version = Version
+						}
+
 						// this is a reference instead of a plain type definition
-						t.OneOf = append(t.OneOf, &Type{
-							Version: Version,
-							Ref:     "#/definitions/" + strings.TrimPrefix(ty, "$"),
-						})
+						t.OneOf = append(t.OneOf, res)
 					} else {
 						t.OneOf = append(t.OneOf, &Type{
 							Type: ty,

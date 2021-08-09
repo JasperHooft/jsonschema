@@ -160,7 +160,7 @@ func TestSchemaGeneration(t *testing.T) {
 		reflector *Reflector
 		fixture   string
 	}{
-		{&RootOneOf{}, &Reflector{RequiredFromJSONSchemaTags: true, ExtraTypes: map[string]reflect.Type{"SecondChildOneOf": reflect.TypeOf(SecondChildOneOf{}), "model.ThirdChildType": reflect.TypeOf(model.ThirdChildType{})}}, "fixtures/oneof.json"},
+		{&RootOneOf{}, &Reflector{SkipSchemaOnRef: true, RequiredFromJSONSchemaTags: true, ExtraTypes: map[string]reflect.Type{"SecondChildOneOf": reflect.TypeOf(SecondChildOneOf{}), "model.ThirdChildType": reflect.TypeOf(model.ThirdChildType{})}}, "fixtures/oneof.json"},
 		{&TestUser{}, &Reflector{}, "fixtures/defaults.json"},
 		{&TestUser{}, &Reflector{AllowAdditionalProperties: true}, "fixtures/allow_additional_props.json"},
 		{&TestUser{}, &Reflector{RequiredFromJSONSchemaTags: true}, "fixtures/required_from_jsontags.json"},

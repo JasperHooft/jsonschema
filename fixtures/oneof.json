@@ -1,5 +1,4 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "$ref": "#/definitions/RootOneOf",
   "definitions": {
     "ChildOneOf": {
@@ -85,22 +84,18 @@
           "type": "string"
         },
         "child": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "$ref": "#/definitions/ChildOneOf"
         },
         "field6": {
           "additionalProperties": true,
           "oneOf": [
             {
-              "$schema": "http://json-schema.org/draft-04/schema#",
               "$ref": "#/definitions/RootOneOf"
             },
             {
-              "$schema": "http://json-schema.org/draft-04/schema#",
               "$ref": "#/definitions/SecondChildOneOf"
             },
             {
-              "$schema": "http://json-schema.org/draft-04/schema#",
               "$ref": "#/definitions/model.ThirdChildType"
             },
             {
