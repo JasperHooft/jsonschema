@@ -97,6 +97,7 @@ type RootOneOf struct {
 	Field3 interface{} `json:"field3" jsonschema:"oneof_type=string;array"`
 	Field4 string      `json:"field4" jsonschema:"oneof_required=group1"`
 	Field5 ChildOneOf  `json:"child"`
+	Field6 interface{} `json:"field6" jsonschema:"oneof_type=$RootOneOf;$ChildOneOf;string"`
 }
 
 type ChildOneOf struct {

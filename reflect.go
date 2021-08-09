@@ -417,7 +417,7 @@ func (t *Type) structKeywordsFromTags(f reflect.StructField, parentType *Type, p
 	t.extraKeywords(extras)
 }
 
-// read struct tags for generic keyworks
+// read struct tags for generic keywords
 func (t *Type) genericKeywords(tags []string, parentType *Type, propertyName string) {
 	for _, tag := range tags {
 		nameValue := strings.Split(tag, "=")
@@ -452,9 +452,17 @@ func (t *Type) genericKeywords(tags []string, parentType *Type, propertyName str
 				t.Type = ""
 				types := strings.Split(nameValue[1], ";")
 				for _, ty := range types {
-					t.OneOf = append(t.OneOf, &Type{
-						Type: ty,
-					})
+					if strings.HasPrefix(ty, "$") {
+						// this is a reference instead of a plain type definition
+						t.OneOf = append(t.OneOf, &Type{
+							Version: Version,
+							Ref:     "#/definitions/" + strings.TrimPrefix(ty, "$"),
+						})
+					} else {
+						t.OneOf = append(t.OneOf, &Type{
+							Type: ty,
+						})
+					}
 				}
 			case "enum":
 				switch t.Type {
