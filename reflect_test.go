@@ -2,6 +2,7 @@ package jsonschema
 
 import (
 	"encoding/json"
+	"github.com/alecthomas/jsonschema/model"
 	"io/ioutil"
 	"net"
 	"net/url"
@@ -97,7 +98,7 @@ type RootOneOf struct {
 	Field3 interface{} `json:"field3" jsonschema:"oneof_type=string;array"`
 	Field4 string      `json:"field4" jsonschema:"oneof_required=group1"`
 	Field5 ChildOneOf  `json:"child"`
-	Field6 interface{} `json:"field6" jsonschema:"oneof_type=$RootOneOf;$ChildOneOf;string"`
+	Field6 interface{} `json:"field6" jsonschema:"oneof_type=$RootOneOf;$SecondChildOneOf;$model.ThirdChildType;string"`
 }
 
 type ChildOneOf struct {
@@ -105,6 +106,10 @@ type ChildOneOf struct {
 	Child2 string      `json:"child2" jsonschema:"oneof_required=group2"`
 	Child3 interface{} `json:"child3" jsonschema:"oneof_required=group2,oneof_type=string;array"`
 	Child4 string      `json:"child4" jsonschema:"oneof_required=group1"`
+}
+
+type SecondChildOneOf struct {
+	Child1 string `json:"child1"`
 }
 
 type Outer struct {
@@ -155,7 +160,7 @@ func TestSchemaGeneration(t *testing.T) {
 		reflector *Reflector
 		fixture   string
 	}{
-		{&RootOneOf{}, &Reflector{RequiredFromJSONSchemaTags: true}, "fixtures/oneof.json"},
+		{&RootOneOf{}, &Reflector{RequiredFromJSONSchemaTags: true, ExtraTypes: map[string]reflect.Type{"SecondChildOneOf": reflect.TypeOf(SecondChildOneOf{}), "model.ThirdChildType": reflect.TypeOf(model.ThirdChildType{})}}, "fixtures/oneof.json"},
 		{&TestUser{}, &Reflector{}, "fixtures/defaults.json"},
 		{&TestUser{}, &Reflector{AllowAdditionalProperties: true}, "fixtures/allow_additional_props.json"},
 		{&TestUser{}, &Reflector{RequiredFromJSONSchemaTags: true}, "fixtures/required_from_jsontags.json"},

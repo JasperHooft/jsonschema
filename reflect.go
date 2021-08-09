@@ -149,6 +149,9 @@ type Reflector struct {
 
 	// AdditionalFields allows adding structfields for a given type
 	AdditionalFields func(reflect.Type) []reflect.StructField
+
+	// Extra types allow for non-detectable types (oneOf of structs eg) to be referencable
+	ExtraTypes map[string]reflect.Type
 }
 
 // Reflect reflects to Schema from a value.
@@ -173,6 +176,23 @@ func (r *Reflector) ReflectFromType(t reflect.Type) *Schema {
 		r.reflectStruct(definitions, t)
 		delete(definitions, r.typeName(t))
 		return &Schema{Type: st, Definitions: definitions}
+	}
+
+	// -- fill the definitions with extra types
+	for rn, ref := range r.ExtraTypes {
+		st := &Type{
+			Type:                 "object",
+			Properties:           orderedmap.New(),
+			AdditionalProperties: []byte("false"),
+		}
+		if r.AllowAdditionalProperties {
+			st.AdditionalProperties = []byte("true")
+		}
+		r.reflectStructFields(st, definitions, ref)
+		r.reflectStruct(definitions, ref)
+		delete(definitions, r.typeName(ref))
+
+		definitions[rn] = st
 	}
 
 	s := &Schema{
