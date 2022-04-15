@@ -1,7 +1,7 @@
 # Go JSON Schema Reflection
 
-**This project is a for of [Alec Thomas' jsonschema](https://github.com/alecthomas/jsonschema).**
-There have been changes to the way jsonschema's are generated which might brake stuff.
+**This project is a fork of [Calmera' jsonschema](https://github.com/calmera/jsonschema) which was originally forked from [Alec Thomas' jsonschema](https://github.com/alecthomas/jsonschema).**
+There have been changes to the way jsonschema's are generated which might break stuff.
 
 ## Introduction
 

@@ -157,7 +157,7 @@ type Reflector struct {
 	SkipSchemaOnRef bool
 
 	// indicate you want to use pointers to indicate if a field is nullable or required
-	NullableAndRequiredFromPointers bool
+	NullableFromPointers bool
 }
 
 // Reflect reflects to Schema from a value.
@@ -736,9 +736,19 @@ func (r *Reflector) reflectFieldName(f reflect.StructField) (string, bool, bool,
 	name := f.Name
 	var required bool
 	var nullable bool
-	if r.NullableAndRequiredFromPointers {
-		required = f.Type.Kind() != reflect.Ptr
-		nullable = f.Type.Kind() == reflect.Ptr
+	if r.NullableFromPointers {
+		required = requiredFromJSONTags(jsonTagsList)
+
+		if r.RequiredFromJSONSchemaTags {
+			required = requiredFromJSONSchemaTags(jsonSchemaTags)
+		}
+
+		switch f.Type.Kind() {
+		case reflect.Ptr, reflect.Array, reflect.Map, reflect.Slice:
+			nullable = true
+		default:
+			nullable = nullableFromJSONSchemaTags(jsonSchemaTags)
+		}
 	} else {
 		required = requiredFromJSONTags(jsonTagsList)
 
