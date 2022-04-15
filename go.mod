@@ -1,4 +1,4 @@
-module github.com/calmera/jsonschema
+module github.com/JasperHooft/jsonschema
 
 go 1.12
 

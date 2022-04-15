@@ -2,7 +2,7 @@ package jsonschema
 
 import (
 	"encoding/json"
-	"github.com/calmera/jsonschema/model"
+	"github.com/JasperHooft/jsonschema/model"
 	"io/ioutil"
 	"net"
 	"net/url"
